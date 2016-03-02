@@ -9,7 +9,7 @@
  */
 
 /**
- * Базовый класс для классов cURL и cURLMulti
+ * Базовый класс для классов cURL, cURLMulti и cURLShare
  */
 abstract class cURLBase
 {
@@ -22,30 +22,22 @@ abstract class cURLBase
 }
 
 /**
- * Класс представляет собой обёртку для работы с библиотекой cURL в одном объекте.
+ * Класс представляет собой обёртку для работы с функциями curl_ в одном объекте.
  */
 class cURL extends cURLBase
 {
     /**
-     * Конструктор класса. Вызывает функцию curl_init, инициализирует новый сеанс cURL.
+     * Конструктор класса.
+     * 
+     * Вызывает функцию <a href="http://php.net/manual/ru/function.curl-init.php" target="_blank">curl_init()</a>, инициализирует новый сеанс cURL.
      * 
      * @see http://php.net/manual/ru/function.curl-init.php
      * @param null|string $url Если указан, опция <b>CURLOPT_URL</b> будет автоматически установлена
      * в значение этого аргумента. Вы можете вручную установить эту опцию при помощи метода <b>setopt</b>.
-     * @param null|resource $resource Ресурс, созданный функцией
-     * <a href="http://php.net/manual/ru/function.curl-init.php" target="_blank">curl_init()</a> заранее.
-     * Если параметр не передан, то ресурс будет создан в конструкторе.
      */
-    public function __construct($url = null, $resource = null)
+    public function __construct($url = null)
     {
-        if(is_resource($resource))
-        {
-            $this->resource = $resource;
-        }
-        else
-        {
-            $this->resource = curl_init($url);
-        }
+        $this->resource = curl_init($url);
     }
     
     /**
@@ -70,13 +62,13 @@ class cURL extends cURLBase
      * Устанавливает несколько параметров для сеанса cURL.
      * 
      * Устанавливает несколько параметров для сеанса cURL. Эта функция полезна при установке большого
-     * количества cURL-параметров без необходимости постоянно вызывать curl_setopt().
+     * количества cURL-параметров без необходимости постоянно вызывать <a href="http://php.net/manual/en/function.curl-setopt.php" target="_blank">curl_setopt()</a>.
      * 
      * @see http://php.net/manual/ru/function.curl-setopt-array.php
-     * @param array $options Массив (array), определяющий устанавливаемые параметры и их значения.
-     * Ключи должны быть корректными константами для функции curl_setopt() или их целочисленными эквивалентами.
-     * @return bool Возвращает TRUE, если все параметры были успешно установлены. Если не удалось успешно установить
-     * какой-либо параметр, немедленно возвращается значение FALSE, а последующие параметры в массиве options будут проигнорированы.
+     * @param array $options Массив, определяющий устанавливаемые параметры и их значения.
+     * Ключи должны быть корректными константами для функции <a href="http://php.net/manual/en/function.curl-setopt.php" target="_blank">curl_setopt()</a> или их целочисленными эквивалентами.
+     * @return bool Возвращает <b>TRUE</b>, если все параметры были успешно установлены. Если не удалось успешно установить
+     * какой-либо параметр, немедленно возвращается значение <b>FALSE</b>, а последующие параметры в массиве options будут проигнорированы.
      */
     public function setoptArray($options)
     {
@@ -104,7 +96,9 @@ class cURL extends cURLBase
     }
     
     /**
-     * Вызывает curl_close.
+     * Завершает сеанс cURL.
+     * 
+     * Завершает сеанс cURL (вызывает <a href="http://php.net/manual/ru/function.curl-close.php" target="_blank">curl_close()</a>) и освобождает все ресурсы. Дескриптор также уничтожается.
      * 
      * @see http://php.net/manual/ru/function.curl-close.php
      */
@@ -114,7 +108,9 @@ class cURL extends cURLBase
     }
     
     /**
-     * Деструктор. Вызывает curl_close.
+     * Деструктор.
+     * 
+     * Завершает сеанс cURL.
      */
     public function __destruct()
     {
@@ -122,7 +118,9 @@ class cURL extends cURLBase
     }
     
     /**
-     * Вызывается после клонирования объекта, вызывает curl_copy_handle,
+     * Копирует дескриптор cURL вместе со всеми его настройками.
+     * 
+     * Вызывается после клонирования объекта, вызывает <a href="http://php.net/manual/ru/function.curl-copy-handle.php" target="_blank">curl_copy_handle()</a>,
      * копирует дескриптор cURL вместе со всеми его настройками.
      * 
      * @see http://php.net/manual/ru/function.curl-copy-handle.php
@@ -135,6 +133,8 @@ class cURL extends cURLBase
     /**
      * Возвращает код последней ошибки.
      * 
+     * Возвращает код ошибки последней операции cURL.
+     * 
      * @see http://php.net/manual/ru/function.curl-errno.php
      * @return int Возвращает номер ошибки или 0 (ноль), если ошибки не произошло.
      */
@@ -146,6 +146,8 @@ class cURL extends cURLBase
     /**
      * Возвращает строку с описанием последней ошибки текущего сеанса.
      * 
+     * Возвращает понятное сообщение об ошибке для последней операции cURL.
+     * 
      * @see http://php.net/manual/ru/function.curl-error.php
      * @return string Возвращает сообщение об ошибке или '' (пустую строку), если ошибки не произошло.
      */
@@ -156,6 +158,9 @@ class cURL extends cURLBase
     
     /**
      * Кодирует строку согласно RFC 3986.
+     * 
+     * Данная функция кодирует строку согласно <a href="http://www.faqs.org/rfcs/rfc3986" target="_blank">RFC 3986</a>.
+     * Так как данная функция появиласть только в php версии 5.5.0, то на более ранних версиях используется функция <a href="http://php.net/manual/ru/function.rawurlencode.php" target="_blank">rawurlencode()</a>.
      * 
      * @see http://php.net/manual/ru/function.curl-escape.php
      * @see http://www.faqs.org/rfcs/rfc3986
@@ -173,6 +178,9 @@ class cURL extends cURLBase
     
     /**
      * Декодирует URL-кодированную строку согласно RFC 3986.
+     * 
+     * Декодирует URL-кодированную строку согласно <a href="http://www.faqs.org/rfcs/rfc3986" target="_blank">RFC 3986</a>.
+     * Так как данная функция появиласть только в php версии 5.5.0, то на более ранних версиях используется функция <a href="http://php.net/manual/ru/function.rawurldecode.php" target="_blank">rawurldecode()</a>.
      * 
      * @see http://php.net/manual/ru/function.curl-unescape.php
      * @see http://www.faqs.org/rfcs/rfc3986
@@ -212,7 +220,9 @@ class cURL extends cURLBase
     }
     
     /**
-     * Выполняет запрос cURL
+     * Выполняет запрос cURL.
+     * 
+     * Выполняет запрос cURL. Этот метод должен вызываться после установки всех необходимых параметров.
      * 
      * @see http://php.net/manual/ru/function.curl-exec.php
      * @return mixed Возвращает <b>TRUE</b> в случае успешного завершения или <b>FALSE</b> в случае возникновения ошибки.
@@ -224,6 +234,8 @@ class cURL extends cURLBase
     }
     
     /**
+     * Возвращает информацию о последней операции.
+     * 
      * Возвращает информацию о последней операции.
      * 
      * @see http://php.net/manual/ru/function.curl-getinfo.php
@@ -243,6 +255,9 @@ class cURL extends cURLBase
     /**
      * Сбрасывает все параметры сеанса cURL, возвращая их к стандартным значениям.
      * 
+     * Сбрасывает все параметры сеанса cURL, возвращая их к стандартным значениям.
+     * Данный метод доступен начиная с php версии 5.5.0! На более ранних версиях его вызов не приведёт ни к какому результату.
+     * 
      * @see http://php.net/manual/ru/function.curl-reset.php
      */
     public function reset()
@@ -254,7 +269,9 @@ class cURL extends cURLBase
     }
     
     /**
-     * Возвращает результат операции, если была установлена опция <b>CURLOPT_RETURNTRANSFER</b>
+     * Возвращает результат операции.
+     * 
+     * Возвращает результат операции, если была установлена опция <b>CURLOPT_RETURNTRANSFER</b>.
      * 
      * @see http://php.net/manual/ru/function.curl-multi-getcontent.php
      * @return string Возвращает содержимое cURL дескриптора, если была использована опция <b>CURLOPT_RETURNTRANSFER</b>.
@@ -266,6 +283,9 @@ class cURL extends cURLBase
     
     /**
      * Служит для постановки и снятия соеднинения с паузы.
+     * 
+     * Служит для постановки и снятия соеднинения с паузы.
+     * Данный метод доступен начиная с php версии 5.5.0! На более ранних версиях его вызов не приведёт ни к какому результату; метод всегда возвращает <b>NULL</b>.
      * 
      * @see http://php.net/manual/ru/function.curl-pause.php
      * @param int $bitmask Одна из констант <a href="https://curl.haxx.se/libcurl/c/curl_easy_pause.html" target="_blank"><b>CURLPAUSE_*</b></a>.
@@ -284,6 +304,9 @@ class cURL extends cURLBase
 
     /**
      * Возвращет строку с описанием указанного кода ошибки.
+     * 
+     * Возвращет строку с описанием указанного кода ошибки.
+     * Данный метод доступен начиная с php версии 5.5.0! На более ранних версиях его вызов не приведёт ни к какому результату; метод всегда возвращает <b>NULL</b>.
      * 
      * @see http://php.net/manual/ru/function.curl-strerror.php
      * @param int $errornum <a href="https://curl.haxx.se/libcurl/c/libcurl-errors.html" target="_blank">Код ошибки CURLE</a>,
@@ -307,22 +330,15 @@ class cURL extends cURLBase
 class cURLMulti extends cURLBase
 {
     /**
-     * Конструктор класса. Вызывает curl_multi_init.
+     * Конструктор класса.
+     * 
+     * Вызывает <a href="http://php.net/manual/ru/function.curl-multi-init.php" target="_blank">curl_multi_init</a>.
      *
-     * @param null|resource $resource Ресурс, созданный функцией
-     * curl_multi_init() ({@link http://php.net/manual/ru/function.curl-multi-init.php}) заранее.
-     * Если параметр не передан, то ресурс будет создан в конструкторе.
+     * @see http://php.net/manual/ru/function.curl-multi-init.php
      */
-    public function __construct($resource = null)
+    public function __construct()
     {
-        if(is_resource($resource))
-        {
-            $this->resource = $resource;
-        }
-        else
-        {
-            $this->resource = curl_multi_init();
-        }
+        $this->resource = curl_multi_init();
     }
 
     /**
@@ -346,7 +362,7 @@ class cURLMulti extends cURLBase
     }
 
     /**
-     * Закрывает набор cURL дескрипторов
+     * Закрывает набор cURL дескрипторов.
      * 
      * @see http://php.net/manual/ru/function.curl-multi-close.php
      */
@@ -356,7 +372,9 @@ class cURLMulti extends cURLBase
     }
     
     /**
-     * Деструктор. Вызывает curl_multi_close.
+     * Деструктор.
+     * 
+     * Вызывает <a href="http://php.net/manual/ru/function.curl-multi-close.php" target="_blank">curl_multi_close()</a>.
      */
     public function __destruct()
     {
@@ -364,13 +382,13 @@ class cURLMulti extends cURLBase
     }
 
     /**
-     * Запускает под-соединения текущего дескриптора cURL
+     * Запускает под-соединения текущего дескриптора cURL.
      *
      * Обрабатывает каждый дескриптор в стеке. Этот метод может быть вызван вне зависимости от необходимости дескриптора читать или записывать данные.
      *
      * @see http://php.net/manual/ru/function.curl-multi-exec.php
      * @param int $still_running Ссылка на флаг, указывающий, идут ли еще какие-либо действия.
-     * @return int Код cURL, указанный в "Предопределенных константах" cURL ({@link http://php.net/manual/ru/curl.constants.php}).
+     * @return int Код cURL, указанный в <a href="http://php.net/manual/ru/curl.constants.php" target="_blank">"Предопределенных константах" cURL</a>.
      * <b>Замечание:</b>
      * Здесь возвращаются ошибки, относящиеся только ко всему стеку.
      * Проблемы все еще могут произойти на индивидуальных запросах, даже когда эта функция возвращает <b>CURLM_OK</b>.
@@ -390,7 +408,7 @@ class cURLMulti extends cURLBase
      * содержащееся в <b>msgs_in_queue</b>, указывает количество оставшихся сообщений после вызова данной функции.
      *
      * @see http://php.net/manual/ru/function.curl-multi-info-read.php
-     * @param int $msgs_in_queue Количество оставшихся сообщений в очереди
+     * @param int $msgs_in_queue Количество оставшихся сообщений в очереди. Данный параметр доступен начиная с php версии 5.2.0.
      * @return array В случае успеха, возвращает ассоциативный массив сообщений, или FALSE в случае неудачи.
      * <table>
      * <caption>Содержимое возвращаемого массива</caption>
@@ -430,7 +448,7 @@ class cURLMulti extends cURLBase
      * 
      * Удаляет указанный дескриптор <b>ch</b> из указанного набора дескрипторов <b>mh</b>.
      * После того, как дескриптор <b>ch</b> удален, его можно снова совершенно легально использовать
-     * в функции curl_exec() ({@link http://php.net/manual/ru/function.curl-exec.php}).
+     * в функции <a href="http://php.net/manual/ru/function.curl-exec.php" target="_blank">curl_exec()</a>.
      * Удаление дескриптора <b>ch</b> во время использования также остановит текущую передачу, идущую на этом дескрипторе.
      * 
      * @see http://php.net/manual/ru/function.curl-multi-remove-handle.php
@@ -460,6 +478,7 @@ class cURLMulti extends cURLBase
     
     /**
      * Задаёт значение указанного параметра для мультидескриптора cURL, представленного текущим объектом.
+     * Данный метод доступен начиная с php версии 5.5.0! На более ранних версиях его вызов не приведёт ни к какому результату; метод всегда возвращает <b>FALSE</b>.
      * 
      * @see http://php.net/manual/ru/function.curl-multi-setopt.php
      * @param int $option Параметр, для которого будет установленно значение - одна из констант <b>CURLMOPT_*</b>.
@@ -477,9 +496,10 @@ class cURLMulti extends cURLBase
     
     /**
      * Возвращет строку с описанием указанного кода ошибки.
+     * Данный метод доступен начиная с php версии 5.5.0! На более ранних версиях его вызов не приведёт ни к какому результату; метод всегда возвращает <b>NULL</b>.
      * 
      * @see http://php.net/manual/ru/function.curl-multi-strerror.php
-     * @param int $errornum Код ошибки CURLM, описание которой необходимо получить. {@link https://curl.haxx.se/libcurl/c/libcurl-errors.html}
+     * @param int $errornum <a href="https://curl.haxx.se/libcurl/c/libcurl-errors.html" target="_blank">Код ошибки CURLM</a>, описание которой необходимо получить.
      * @return string Возвращет строку с описанием указанного кода ошибки
      * CURLM или возвращает <b>NULL</b>, если указанного кода ошибки не существует.
      */
@@ -495,22 +515,18 @@ class cURLMulti extends cURLBase
 
 /**
  * Класс представляет собой обёртку для curl_share функций.
+ * Так как функции curl_share стали доступны только в php версии 5.5.0, то на более ранних версиях использовать этот класс не имеет смысла.
  */
 class cURLShare extends cURLBase
 {
     /**
      * Конструктор класса.
-     *
-     * @param resource $resource Ресурс, созданный функцией curl_share_init() ({@link http://php.net/manual/en/function.curl-share-init.php}) заранее.
-     * Если параметр не передан, то функция curl_share_init() будет вызывана в конструкторе.
+     * 
+     * Вызывает функцию <a href="http://php.net/manual/en/function.curl-share-init.php" target="_blank">curl_share_init()</a>.
      */
-    public function __construct($resource = null)
+    public function __construct()
     {
-        if(is_resource($resource))
-        {
-            $this->resource = $resource;
-        }
-        elseif(version_compare(PHP_VERSION, '5.5.0', '>='))
+        if(version_compare(PHP_VERSION, '5.5.0', '>='))
         {
             $this->resource = curl_share_init();
         }
@@ -533,7 +549,7 @@ class cURLShare extends cURLBase
      * Если общий доступ открыт, то это экономит время, на SSL-хэндшейках при повторном подключении к серверам, с которыми ранее уже
      * устанавливалось соединение. Обратите внимание, что одиночный cURL-ресурс и так использует идентификаторы SSL повторно.</li>
      * </ul>
-     * @return bool Возвращает TRUE в случае успеха, иначе &mdash; FALSE.
+     * @return bool Возвращает <b>TRUE</b> в случае успеха, иначе &mdash; <b>FALSE</b>.
      */
     public function setopt($option, $value)
     {
@@ -556,7 +572,7 @@ class cURLShare extends cURLBase
     }
 
     /**
-     * Деструктор
+     * Деструктор.
      */
     public function __destruct()
     {

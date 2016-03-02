@@ -1,0 +1,21 @@
+{
+    "name": "syarunichev/curl",
+    "description": "Данная библиотека представляет собой объектно-ориентированную обёртку для cURL функций.",
+    "type": "library",
+    "license": "CC-BY-4.0",
+    "authors": [
+        {
+            "name": "Сергей Яруничев",
+            "email": "xj5e34gnku22iiwi7q5d761zs2mkqx@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.0.0",
+        "ext-curl": "*"
+    },
+    "autoload": {
+        "classmap": [
+            "cURL.php"
+        ]
+    }
+}
